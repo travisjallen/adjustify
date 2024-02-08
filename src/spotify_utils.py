@@ -8,6 +8,7 @@ Author: Travis Allen
 """
 import os
 import time
+from threading import Timer
 import spotipy
 import numpy as np
 from spotipy.oauth2 import SpotifyOAuth
@@ -33,6 +34,7 @@ def create_client():
                                                redirect_uri="http://localhost:1234",
                                                scope=scope))
     return sp
+
     
 def pause_after_this_song(client: spotipy.Spotify) -> None:
     """
@@ -48,9 +50,10 @@ def pause_after_this_song(client: spotipy.Spotify) -> None:
     if cp["is_playing"] is False:
         return
 
-    time_remaining = cp["item"]["duration_ms"] - cp["progress_ms"]
-    time.sleep(float(time_remaining)/1000.0)
-    client.pause_playback()
+    time_remaining = float(cp["item"]["duration_ms"] - cp["progress_ms"])/1000.0
+    t = Timer(time_remaining,client.pause_playback,args=None,kwargs=None)
+    t.start()
+    
     
 def artist_skip(client: spotipy.Spotify, artist: str) -> None:
     """
